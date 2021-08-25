@@ -2,3 +2,4 @@ steps.md
 AuthSeries/bin
 AuthSeries/obj
 .vscode
+**/Firebase/*.json
