@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 namespace AuthSeries
 {
@@ -32,6 +34,13 @@ namespace AuthSeries
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "AuthSeries", Version = "v1" });
             });
+
+            FirebaseApp.Create(new AppOptions
+            {
+                Credential = GoogleCredential.FromFile(@"C:\Projects\SampleProjects\auth-series\auth-series\AuthSeries\Firebase\auth-series-firebase-adminsdk-rk7k4-4dc58434f2.json")
+            });
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
