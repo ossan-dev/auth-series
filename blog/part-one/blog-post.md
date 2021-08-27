@@ -89,12 +89,77 @@ IMPORTANT: u must replace my path with yours. In production u should not hard-co
     }
 }
 ```
-
+IMPORTANT: u must replace "auth-series" with the project id u choose for your Firebase project (u can find it in "Project settings > General" in Firebase Console).
 #### Startup.cs
+Before editing this file u have to install two Nuget packages. Issue in the terminal these two commands:
+1. `dotnet add package Microsoft.AspNetCore.Authentication`
+1. `dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer`  
+After that be sure to append these two using statements at the top of the file:
+1. `using Microsoft.IdentityModel.Tokens;`
+1. `using Microsoft.AspNetCore.Authentication.JwtBearer;`  
+Now u are ready to edit the two methods of the Startup.cs.
+##### ConfigureServices
+Under the Firebase app's registration place the following code to set parameters for JWT token provided by Google Firebase.
 
-
+```csharp
+// firebase auth
+services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(opt =>
+{
+    opt.Authority = Configuration["Jwt:Firebase:ValidIssuer"];
+    opt.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = Configuration["Jwt:Firebase:ValidIssuer"],
+        ValidAudience = Configuration["Jwt:Firebase:ValidAudience"]
+    };
+});
+```
+HINT: in order to make the code type safer u should consider using the options pattern and bind settings to POCO classes. Moreover u have to place these sensitive data in a more secure place.  
+##### Configure
+With the following change u're about to add the authentication in the middleware pipeline.
+```csharp
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+```
+#### WeatherForecastController.cs
+The final thing to change is the endpoint that will be secured. Add `using Microsoft.AspNetCore.Authorization;` at the top of the file.  
+Above the signature of Get method add `[Authorize]` to restrict access to this action only to authenticated users.
 ## Final test
+Now, let's test our work. In order to prove that we're right we need of two calls: one to sign-in a user in Firebae and one to query our endpoint.
+### Firebase request
+Before creating the request u must get the web API key from Firebase project. As before, u have to navigate "Project settings > General" and copy the web API key as u can see below:
+<p align="center">
+    <img src="https://github.com/ivan-pesenti/auth-series/blob/main/blog/part-one/img/fb-web-api-key.png?raw=true" alt="firebase web api key" width="700px">
+</p>  
+In postman create a request with the following params:
+1. type: POST
+1. url: https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?
+1. headers:
+  1. key: \<your secret web API key\>
+1. body:
 
+```json
+{
+    "email": "test@test.com",
+    "password": "password",
+    "returnSecureToken": true
+}
+```
+Execute the request and copy the idToken that appears in the output console.
+### WeatherForecast request
+Reopen the request used above and go in "Authorization" tab. Select "Bearer Token" as type and paste in the token copied before.  
+Hit send and u'll get the requested resource.
 ## Summary
-
+Congratulations! U successfully did the first part of this series. Now u're able to restrict access to your resource to only authenticated users. Moreover, u are able to integrate Google Firebase as authentication provider in your web api with a couple of simple steps. 
 ## What's next
+In the following blog post we're going to generate our JWT token directly within our web api instead of using the Firebase's one. We're going to create an endpoint to sign-in users by issuing a JWT token.  
+If this sounds exciting for you, don't miss it.  
+
+I hope you enjoy this post and find it useful. If you have any questions or you want to spot me some errors I really appreciate it and I'll make my best to follow up. If you enjoy it and would like to sustain me consider giving a like and sharing on your favorite socials. If u want u can add me on your socials this makes me very very happy!
+
+Stay safe and see you soon! 😎
