@@ -4,39 +4,39 @@
 
 dotnet, google, firebase, authentication, webapi, vscode  
 
-Security has always been one of my major concerns when developing applications, especially in web development where our resources can be consumed from everywhere (and potentially from anyone). Be able to restrict the resources' access to only certain people is foundamental.  
-Nowadays data loss, identity theft and other cyber threats are constantly increasing. So, in order to reduce this probability that could lead to a business failure, we must write secure and reliable code in our daily development life.
-If all of this is a concern also for you I encourage u read carefully this blog post (that will be the first of a series of three).
-
-## The big picture
-Throughout this series we're going to build a web api project that supports two authentication providers: Google Firebase and our web api itself. The user, in order to access the web api resource, must be authenticated either against the former or against the latter authentication providers. If this is the case the user will receive a 200 OK response together with the requested data. Otherwise, it will receive a 401 Unauthorized response with no data. The authentication mechanism would be the token authentication in JWT format.  
+**Security** has always been one of my major concerns when developing applications, especially in web development where our resources can be consumed from everywhere (and potentially from anyone). Be able to restrict the resources' access to only certain people is fundamental.  
+Nowadays data loss, identity theft and other cyber threats are constantly increasing. So, in order to reduce this probability that could lead (in the worst scenario) to a business failure, we must write _secure_ and _reliable_ code in our daily development life.
+If all of this is a also for you a concern I strongly encourage u to read carefully this blog post (that will be the first of a series of three).
+## The big picture 🌍
+Throughout this series we're going to build a web api project that supports two authentication providers: **Google Firebase** and our **web api itself**. The user, in order to access the web api resource, must be authenticated either against the former or against the latter authentication providers. If this is the case the user will receive a **200** OK response together with the requested data. Otherwise, it will receive a **401** Unauthorized response with no data. The authentication mechanism would be the _token authentication_ in JWT format.  
+🧐NOTE🧐: if u need to learn more about Google Firebase u can checkout this [link](https://firebase.google.com/).  
 To maintain the blog post leaner I decided to split this building process into three parts. 
 ## The first piece
-In this blog post we're gonna to create a web api project, create some requests to test it, configure stuff related to Firebase in our web api proj, use the Firebase console to accomplish stuff and implement the Firebase authentication mechanism in our web api. 
+In this blog post we're gonna to create a web api project, create some requests to test it, configure stuff related to Firebase in our web api proj, use the Firebase console to manage our proj and implement the Firebase authentication mechanism in our web api. 
 ## Preamble
-This will be a demo application to show off how do things. U can take these concepts and adapt them to your real-world requirements. I'm not going to follow every best practices to save time but I'll do my best to spot things that are not "real-world ready" to use.  
-As always, if u get in trouble in following this tutorial u can check the final solution in Github at this [link](https://github.com/ivan-pesenti/auth-series)
-## Let's start
-After these necessary thoughts we can start the fun part, what everybody are waiting for... the coding!
+This will be a demo application to show off a way to implement authentication in .NET. U can take away these concepts and adapt them to your real-world requirements.  
+🔴IMPORTANT❗🔴: I'm not going to follow every best practices to save time but I'll do my best to spot things that are not "real-world ready" to use.  
+As always, if u get in trouble in following this tutorial u can check the final solution in GitHub at this [link](https://github.com/ivan-pesenti/auth-series).
+## Let's start 🚀
+After these necessary thoughts we can start the fun part, what everybody are waiting for... the **_coding_**!
 ### Prerequisites
-To follow this tutorial u must prepare your machine with some tools and programs:
+To follow this tutorial u must install on your machine some tools and programs:
 1. NET 5 Runtime. U can download from [here](https://dotnet.microsoft.com/download/dotnet/5.0)
 1. Visual Studio Code (u can use another IDE if u wish). Download can be found [here](https://code.visualstudio.com/download)
 1. Postman (u can use another program to consume REST-api if u wish). Download can be found [here](https://www.postman.com/downloads/)
 1. Google Firebase project with a user registered.  
-NOTE: u must be sure that Email/Password Sign-in method is enabled. When u create a Firebase project it's not enabled by defalt. The correct config is the same as in the below image:  
 
+⚠️WARNING⚠️: u must be sure that Email/Password Sign-in method is enabled. When u create a Firebase project it's **not enabled** by default. The correct config is the same as in the below image:  
 <p align="center">
     <img src="https://github.com/ivan-pesenti/auth-series/blob/main/blog/part-one/img/fb-sign-in-methods.png?raw=true" alt="firebase sign-in methods" width="700px">
 </p>
-
 ### Setup web api proj
 First, we must create a web api proj. I'll do these kind of stuff from dotnet CLI. So open up a terminal (or use the one integrated in VSCode) and issue:   
 `dotnet new webapi -n "AuthSeries"`  
 When VSCode will prompt u to restore dependencies give a yes and go ahead.
 ### Test it
 Now to be sure that everything looks fine before start to edit we're going to give it a first try.  
-Change directory with `cd AuthSeries` and run the web api with the command `dotnet run`. By default the web api will be launched on port 5001 for HTTPS protocol.  
+Change directory with `cd AuthSeries` and run the web api with the command `dotnet run`. By default the web api will be launched on port 5001 for **HTTPS** protocol.  
 Open up Postman and create a request with the following params:  
 1. HTTP method: GET
 1. URL: https://localhost:5001/weatherforecast  
@@ -44,7 +44,7 @@ Open up Postman and create a request with the following params:
 Hit "Send" and u should receive dummy data generated by our web api.
 ## Firebase stuff
 Open your Firebase project within the Google Firebase Console.  
-NOTE: to be sure URL of your project should something like 'https://console.firebase.google.com/u/0/xxxxxxx'.
+🧐NOTE🧐: the project's URL should be something like 'https://console.firebase.google.com/u/0/xxxxxxx'.
 ### Create Web App
 Click on the little gear next to "Project overview" and select "Project settings". In "General" tab scroll toward the bottom and click the icon in the following image:
 
@@ -54,19 +54,19 @@ Click on the little gear next to "Project overview" and select "Project settings
 
 Give a meaningful name, I choose "auth-series-app" to discriminate from the Firebase proj called "auth-series" and click "Register App". After that select "Continue to console".
 ### Create Service Account Key
-In order to manage programmatically our Firebase proj directly inside our web api proj through the Firebase Admin SDK we must generate a secret private key that we'll be used to identify our web api in Firebase scope.  
+In order to manage programmatically the Firebase proj from the web api codebase through the **Firebase Admin SDK** we must generate a **secret private key** that we'll be used to identify our web api into Firebase scope.  
 Go to "Service accounts", "Firebase Admin Sdk" and click "Create service account".  
 The following window will appear:
 
 <p align="center">
-    <img src="https://github.com/ivan-pesenti/auth-series/blob/main/blog/part-one/img/fb-security-warning.png?raw=true" alt="firebase security warning" width="700px">
+    <img src="https://github.com/ivan-pesenti/auth-series/blob/main/blog/part-one/img/fb-security-warning.png?raw=true" alt="firebase security warning" width="450px">
 </p>
 
 Click "Generate key" and a JSON file will be downloaded on your machine. Keep on hand this file as we're going to use it immediately.
-## Wire up Firebase and Web Api
+## Wire up Firebase and Web Api ⛓
 Now, let's connect the dots! We've to create a bridge between Firebase and our web api proj.
 ### Firebase registration inside our Web Api
-Change directory (if u're not already there) with `cd AuthSeries` and issue `mkdir Firebase`. Copy the JSON file downloaded above into this folder. Issue the following command in CLI to add a Nuget package:  
+Change directory (if you're not already there) with `cd AuthSeries` and issue `mkdir Firebase`. Copy the JSON file downloaded above into this folder. Issue the following command in CLI to add a NuGet package:  
 ```shell
 dotnet add package FirebaseAdmin
 ```
@@ -74,12 +74,15 @@ Open the file Startup.cs and add this `using FirebaseAdmin;` below the other usi
 Finally add the following code to the ConfigureServices() method of Startup.cs class file:
 ```csharp
 FirebaseApp.Create(new AppOptions
-    {
-        Credential = GoogleCredential.FromFile(@"C:\Projects\SampleProjects\auth-series\auth-series\AuthSeries\Firebase\auth-series-firebase-adminsdk-rk7k4-4dc58434f2.json")
-    });
+{
+    Credential = GoogleCredential.FromFile(@"C:\Projects\SampleProjects\auth-series\auth-series\AuthSeries\Firebase\auth-series-firebase-adminsdk-rk7k4-4dc58434f2.json")
+});
 ```
-IMPORTANT: u must replace my path with yours. In production u should not hard-coded info in this way. U could use environment variable, .NET User Secrets and so on.
+🔵IMPORTANT🔵: u must replace my path with your. In production u **should not hard-coded** info in this way. U could use environment variable, .NET User Secrets and so on.
 ### Add firebase authentication in IOC container
+Up to now, we've only registered the Firebase proj inside our web api.  
+The next thing is to tell to our web api that we'd like to use Firebase as authentication provider.  
+To achieve it we must change some files.
 #### appsettings.json 
 ```json
 "Jwt": {
@@ -89,17 +92,19 @@ IMPORTANT: u must replace my path with yours. In production u should not hard-co
     }
 }
 ```
-IMPORTANT: u must replace "auth-series" with the project id u choose for your Firebase project (u can find it in "Project settings > General" in Firebase Console).
+⚠️WARNING⚠️: u must replace "auth-series" with the project id u choose for your Firebase project (u can find it in "Project settings > General" in Firebase Console).
 #### Startup.cs
-Before editing this file u have to install two Nuget packages. Issue in the terminal these two commands:
+Before editing this file u have to install two NuGet packages. Issue in the terminal these two commands:
 1. `dotnet add package Microsoft.AspNetCore.Authentication`
 1. `dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer`  
+
 After that be sure to append these two using statements at the top of the file:
 1. `using Microsoft.IdentityModel.Tokens;`
 1. `using Microsoft.AspNetCore.Authentication.JwtBearer;`  
+
 Now u are ready to edit the two methods of the Startup.cs.
-##### ConfigureServices
-Under the Firebase app's registration place the following code to set parameters for JWT token provided by Google Firebase.
+##### ConfigureServices method
+Under the Firebase app's registration (the code added above) place the following code to set parameters for **JWT token** provided by Google Firebase.
 
 ```csharp
 // firebase auth
@@ -118,9 +123,9 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     };
 });
 ```
-HINT: in order to make the code type safer u should consider using the options pattern and bind settings to POCO classes. Moreover u have to place these sensitive data in a more secure place.  
-##### Configure
-With the following change u're about to add the authentication in the middleware pipeline.
+🔎**HINT**🔎: in order to make the code type safer u should consider using the _options pattern_ and bind settings to POCO classes. Moreover u have to place these sensitive data in a more secure place.  
+##### Configure method
+With the following change you're about to add the authentication middleware in the middlewares' pipeline.
 ```csharp
 app.UseRouting();
 app.UseAuthentication();
@@ -130,34 +135,38 @@ app.UseAuthorization();
 The final thing to change is the endpoint that will be secured. Add `using Microsoft.AspNetCore.Authorization;` at the top of the file.  
 Above the signature of Get method add `[Authorize]` to restrict access to this action only to authenticated users.
 ## Final test
-Now, let's test our work. In order to prove that we're right we need of two calls: one to sign-in a user in Firebae and one to query our endpoint.
+Now, let's test our work. In order to prove that we're right we need of two requests: one to _sign-in_ a user in Firebase and one to _query_ our endpoint.
 ### Firebase request
-Before creating the request u must get the web API key from Firebase project. As before, u have to navigate "Project settings > General" and copy the web API key as u can see below:
+Before creating the request u must get the **web API key** from Firebase project. As before, u have to navigate "Project settings > General" and copy the web API key as u can see below:
 <p align="center">
-    <img src="https://github.com/ivan-pesenti/auth-series/blob/main/blog/part-one/img/fb-web-api-key.png?raw=true" alt="firebase web api key" width="700px">
+    <img src="https://github.com/ivan-pesenti/auth-series/blob/main/blog/part-one/img/fb-web-api-key.png?raw=true" alt="firebase web api key" width="600px">
 </p>  
 In postman create a request with the following params:
-1. type: POST
-1. url: https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?
-1. headers:
-  1. key: \<your secret web API key\>
-1. body:
 
-```json
-{
-    "email": "test@test.com",
-    "password": "password",
-    "returnSecureToken": true
-}
-```
-Execute the request and copy the idToken that appears in the output console.
+1. HTTP method: POST
+1. URL: https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?
+1. headers:
+    - key: \<your secret web API key\>
+1. body:
+    ```json
+    {
+        "email": "test@test.com",
+        "password": "password",
+        "returnSecureToken": true
+    }
+    ```
+Execute the request and copy the _idToken_ that u get back in the output console.
 ### WeatherForecast request
-Reopen the request used above and go in "Authorization" tab. Select "Bearer Token" as type and paste in the token copied before.  
-Hit send and u'll get the requested resource.
+1. Reopen the request used above 
+1. Go in "Authorization" tab
+1. Select "Bearer Token" as type
+1. Paste in the token copied before
+1. Hit send and u'll get the requested resource
+
 ## Summary
-Congratulations! U successfully did the first part of this series. Now u're able to restrict access to your resource to only authenticated users. Moreover, u are able to integrate Google Firebase as authentication provider in your web api with a couple of simple steps. 
-## What's next
-In the following blog post we're going to generate our JWT token directly within our web api instead of using the Firebase's one. We're going to create an endpoint to sign-in users by issuing a JWT token.  
+Congratulations 🏆! U successfully did the first part of this series. Now you're able to restrict 🔐 access to your resource to only authenticated users. Moreover, u are able to integrate Google Firebase as authentication provider in your web api with a couple of simple steps. 
+## What's next 🐱‍🏍
+In the next blog post we're going to generate our JWT token directly within our web api instead of using Firebase. We're going to create an endpoint to sign-in users by **issuing** a JWT token.  
 If this sounds exciting for you, don't miss it.  
 
 I hope you enjoy this post and find it useful. If you have any questions or you want to spot me some errors I really appreciate it and I'll make my best to follow up. If you enjoy it and would like to sustain me consider giving a like and sharing on your favorite socials. If u want u can add me on your socials this makes me very very happy!
