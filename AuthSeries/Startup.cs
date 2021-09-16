@@ -15,6 +15,8 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using AuthSeries.Services;
+using System.Text;
 
 namespace AuthSeries
 {
@@ -42,22 +44,40 @@ namespace AuthSeries
                 Credential = GoogleCredential.FromFile(@"C:\Projects\SampleProjects\auth-series\auth-series\AuthSeries\Firebase\auth-series-firebase-adminsdk-rk7k4-4dc58434f2.json")
             });
 
+            services.AddTransient<ITokenService, TokenService>();
 
             // firebase auth
+            // services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            // .AddJwtBearer(opt =>
+            // {
+            //     opt.Authority = Configuration["Jwt:Firebase:ValidIssuer"];
+            //     opt.TokenValidationParameters = new TokenValidationParameters
+            //     {
+            //         ValidateIssuer = true,
+            //         ValidateAudience = true,
+            //         ValidateLifetime = true,
+            //         ValidateIssuerSigningKey = true,
+            //         ValidIssuer = Configuration["Jwt:Firebase:ValidIssuer"],
+            //         ValidAudience = Configuration["Jwt:Firebase:ValidAudience"]
+            //     };
+            // });
+
+            // auth demo
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(opt =>
             {
-                opt.Authority = Configuration["Jwt:Firebase:ValidIssuer"];
                 opt.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = Configuration["Jwt:Firebase:ValidIssuer"],
-                    ValidAudience = Configuration["Jwt:Firebase:ValidAudience"]
+                    ValidIssuer = Configuration["Jwt:AuthDemo:ValidIssuer"],
+                    ValidAudience = Configuration["Jwt:AuthDemo:ValidAudience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:AuthDemo:Key"]))
                 };
             });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
