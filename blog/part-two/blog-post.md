@@ -1,6 +1,6 @@
-# Custom Jwt Authentication .NET 5
+# Custom JWT Authentication .NET 5
 
-## dotnet, jwt, authentication, webapi, vscode
+## dotnet, JWT, authentication, webapi, vscode
 
 Hi guys! Welcome back to my Authentication series. It's a pleasure for me to have you here 😁.  
 🔴IMPORTANT❗🔴: this is the second post of a series so, if you missed the previous one, I strongly suggest you to check it out from the link above.  
@@ -153,7 +153,7 @@ namespace AuthSeries.Controllers
 This class simply have a constructor with two dependencies (more on "ITokenService" soon) and expose a single action that will return a valid JWT token to a user.  
 🧐NOTE🧐: you should not read the settings in this way as it's not **strongly-typed** and so it's a more **error-prone** method. Consider using the **Options pattern**. More on this [here](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options?view=aspnetcore-5.0).
 
-## Connect the dots 🧩
+## Connects the dots 🧩
 One of the major changes that we must do is inside the "Startup.cs" in the "ConfigureServices()" method. The method will look like this:
 ```csharp
 public void ConfigureServices(IServiceCollection services)
@@ -203,10 +203,10 @@ If you've started from this post you must also do two brief final steps in "Weat
 1. Add this using statement: `using Microsoft.AspNetCore.Authorization;` at the top of the file
 
 ## Moment of truth 👨🏻‍🏫
-Now the last thing left is to give a try to our work.  
+Now the last thing left is to give a try to our work.
 Issue a `dotnet run` in your preferred terminal and wait for the application to start.  
 Bring up Postman and try a simple request at the endpoint https://localhost:5001/weatherforecast. This should result in a **401 unauthorized** error.  
-As expected, we must sign in ourself before try to hit the WeatherForecast endpoint.  
+As expected, we must sign in ourselves before try to hit the WeatherForecast endpoint.  
 Create a new Postman request with the following parameters:
 1. type: **POST**
 1. url: *https://localhost:5001/users/sign-in*
