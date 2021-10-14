@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using AuthSeries.Services;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AuthSeries
 {
@@ -47,24 +48,24 @@ namespace AuthSeries
             services.AddTransient<ITokenService, TokenService>();
 
             // firebase auth
-            // services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            // .AddJwtBearer(opt =>
-            // {
-            //     opt.Authority = Configuration["Jwt:Firebase:ValidIssuer"];
-            //     opt.TokenValidationParameters = new TokenValidationParameters
-            //     {
-            //         ValidateIssuer = true,
-            //         ValidateAudience = true,
-            //         ValidateLifetime = true,
-            //         ValidateIssuerSigningKey = true,
-            //         ValidIssuer = Configuration["Jwt:Firebase:ValidIssuer"],
-            //         ValidAudience = Configuration["Jwt:Firebase:ValidAudience"]
-            //     };
-            // });
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer("Firebase", opt =>
+            {
+                opt.Authority = Configuration["Jwt:Firebase:ValidIssuer"];
+                opt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Configuration["Jwt:Firebase:ValidIssuer"],
+                    ValidAudience = Configuration["Jwt:Firebase:ValidAudience"]
+                };
+            });
 
             // auth demo
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(opt =>
+            .AddJwtBearer("AuthDemo", opt =>
             {
                 opt.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -78,6 +79,13 @@ namespace AuthSeries
                 };
             });
 
+            services.AddAuthorization(opt =>
+            {
+                opt.DefaultPolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes("Firebase", "AuthDemo")
+                .RequireAuthenticatedUser()
+                .Build();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
