@@ -145,7 +145,7 @@ In postman create a request with the following params:
 
 1. HTTP method: POST
 1. URL: https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?
-1. headers:
+1. params:
     - key: \<your secret web API key\>
 1. body:
     ```json
